@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (MiKTeX 21.8) (preloaded format=pdflatex 2021.12.2)  2 DEC 2021 18:11
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (MiKTeX 21.8) (preloaded format=pdflatex 2021.12.2)  3 DEC 2021 23:27
 entering extended mode
 **./report.tex
 (report.tex
@@ -49,26 +49,56 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <8> on input line 10.
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <6> on input line 10.
- [1
 
-{C:/Users/flori/AppData/Local/MiKTeX/pdftex/config/pdftex.map}] (report.aux) ) 
+Underfull \hbox (badness 10000) in paragraph at lines 19--26
+
+ []
+
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <10.95> on input line 27.
+
+Underfull \hbox (badness 10000) in paragraph at lines 33--59
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 33--59
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 33--59
+
+ []
+
+[1
+
+{C:/Users/flori/AppData/Local/MiKTeX/pdftex/config/pdftex.map}] [2]
+(report.aux) ) 
 Here is how much of TeX's memory you used:
- 416 strings out of 478927
- 7486 string characters out of 2852535
- 300134 words of memory out of 3000000
- 18348 multiletter control sequences out of 15000+600000
- 407370 words of font info for 40 fonts, out of 8000000 for 9000
+ 419 strings out of 478927
+ 7540 string characters out of 2852535
+ 305134 words of memory out of 3000000
+ 18351 multiletter control sequences out of 15000+600000
+ 407986 words of font info for 42 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  32i,7n,41p,484b,203s stack positions out of 5000i,500n,10000p,200000b,80000s
-<
-C:/Users/flori/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmb
-x12.pfb><C:/Users/flori/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfon
-ts/cm/cmr10.pfb><C:/Users/flori/AppData/Local/Programs/MiKTeX/fonts/type1/publi
-c/amsfonts/cm/cmr12.pfb><C:/Users/flori/AppData/Local/Programs/MiKTeX/fonts/typ
-e1/public/amsfonts/cm/cmr17.pfb>
-Output written on report.pdf (1 page, 56547 bytes).
+<C:/Users/flori/AppData/Local/Programs/MiKTeX/fonts/type1/public/
+amsfonts/cm/cmbx12.pfb><C:/Users/flori/AppData/Local/Programs/MiKTeX/fonts/type
+1/public/amsfonts/cm/cmex10.pfb><C:/Users/flori/AppData/Local/Programs/MiKTeX/f
+onts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/flori/AppData/Local/Programs
+/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/flori/AppData/Local/
+Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/flori/AppDat
+a/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/flor
+i/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Us
+ers/flori/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pf
+b><C:/Users/flori/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/
+cmr8.pfb><C:/Users/flori/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfo
+nts/cm/cmsy10.pfb><C:/Users/flori/AppData/Local/Programs/MiKTeX/fonts/type1/pub
+lic/amsfonts/cm/cmsy8.pfb>
+Output written on report.pdf (2 pages, 126857 bytes).
 PDF statistics:
- 26 PDF objects out of 1000 (max. 8388607)
+ 64 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
