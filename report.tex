@@ -33,7 +33,7 @@ Method description :
 Naive solution would be to use $sinc$ filters to get band-limited signal.
 The solution used is wavelet because of the wide variety of basis functions used in renderers and wavelet.
 \\\\
-$M(x) = \sum\limits_{b=-b_{min}}^{b_{max}} w_{b}N(2^{b}x)$
+$M(x) = \sum\limits_{b=b_{min}}^{b_{max}} w_{b}N(2^{b}x)$
 \\
 with :
 \\
@@ -56,6 +56,29 @@ $K(x-i)\rightarrow$ Kernel filter centered at pixel i with $K(x) \geq 0$
 \\
 \\
 It's not possible to prevent aliasing with all the different conditions of rendering. The method will guarantee no aliasing under ideal conditions.
+\\
+$S(x)\approx M(2^s(x-k))$
+\\
+$s\rightarrow$ the scale of the scene at pixel $i$
+\\
+$k\rightarrow$ is the offset at pixel i
+\\\\
+$Pixel(i) = \int M(2^s(x-k))K(x-i)dx $ 
+\\
+$ = \int\sum\limits_{b=b_{min}}^{b_{max}} w_{b}N(2^{s+b}(x-k))K(x-i)dx$
+\\
+$ = \sum\limits_{j=b_{min}+s}^{b_{max}+s} w_{j-s} \int N(2^{j}x-l)K(x-i)dx $
+\\
+$s+b\rightarrow j$
+\\
+$2^{s+b}k\rightarrow l$
+\\\\
+$N(2^{j}x-l)K(x-i)dx = 0 \rightarrow j\geq0 $
+\\
+This means that N(x) and K(x) are orthogonal.
+\\
+And so noise function should vanish when aliasing occur.
+\\
 
 
 \section{Main body}
