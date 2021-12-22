@@ -1,6 +1,9 @@
 #include <math.h>
 #include <iostream>
 #include <random>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 /* Note: this code is designed for brevity, not efficiency; many operations can be hoisted,
  * precomputed, or vectorized. Some of the straightforward details, such as tile meshing,
@@ -192,11 +195,20 @@ float WMultibandNoise(float p[3], float s, float *normal, int firstBand, int nba
 
 int main(int argc, char const *argv[])
 {
-    GenerateNoiseTile(4);
-    for (int i = 0; i < noiseTileSize * noiseTileSize * noiseTileSize; i++)
+    GenerateNoiseTile(100);
+    
+    cv::Mat noiseImage = cv::Mat(std::sqrt(noiseTileSize*noiseTileSize*noiseTileSize),std::sqrt(noiseTileSize*noiseTileSize*noiseTileSize),CV_32F);
+    int n = 0;
+    for(int i = 0;i < std::sqrt(noiseTileSize*noiseTileSize*noiseTileSize);i++)
     {
-        std::cout << noiseTileData[i] << std::endl;
+        for(int j = 0;j < std::sqrt(noiseTileSize*noiseTileSize*noiseTileSize);j++)
+        {
+            noiseImage.at<float>(i,j) = (noiseTileData[n]+1)/2;
+            n++;
+            //std::cout << i << " " << j << " " << noiseTileSize << std::endl;
+        }
     }
-
+    cv::imshow("image", noiseImage);
+    cv::waitKey(0);
     return 0;
 }
