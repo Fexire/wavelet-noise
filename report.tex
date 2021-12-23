@@ -79,12 +79,37 @@ This means that N(x) and K(x) are orthogonal.
 \\
 And so noise function should vanish when aliasing occur.
 \\\\
-
 scale correspond to how much the noise will be at the right scale.
 \\
 scale -1 = no scale\\
-scale>-1 = scale up\\
-scale < -1 = scale down
+scale > -1 = scale up\\
+scale < -1 = scale down\\\\
+$F(x) = \sum\limits_{i}f_i \phi(x-i)$\\
+A refinable function is needed (when up scaling we keep the same set of functions).
+We can use coefficients $f_i^\uparrow$ to upscale the function.\\
+$F(x) = \sum\limits_{i}f_i^\uparrow \phi(2x-i)$\\
+$f_i^\uparrow =\sum\limits_{k}p_{i-2k}f_k $\\
+It is not true for downscaling.\\
+$G(x) = G^{\downarrow}(x) + D(x)$\\
+$D(x)\longrightarrow$ residual \\
+$g_i^\downarrow=\sum\limits_{k}a_{k-2i}g_k $\\
+$\int D(2^jx-l)\phi(x-i)dx$\\
+Thus, if we build our noise bands in the wavelet space $W_0$, then they can be
+scaled to any resolution j and be guaranteed to have no effect on
+images at any resolution less than j.
+\\
+We will uniform quadratric B-spline for our kernel because it close to renderer filters, low degree simple to evaluate and efficient, good for procedural shading.\\\\
+1. Create random noise from the basis function\\
+2. Downsample $R(x)$\\
+3. Upsample $R^{\uparrow\downarrow}(x)$\\
+4  $R(x) - R^{\uparrow\downarrow}(x)$\\\\
+same for multiple dimensions\\
+integer to float is not a problem, it converges fast\\
+projected noise pas tout compris\\
+noise evaluation using weight, see code\\
+this noise can controll statisticall distribution base on guassian distribution.\\
+use one noise tile\\
+
 
 \section{Main body}
 

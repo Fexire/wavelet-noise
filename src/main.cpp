@@ -195,17 +195,16 @@ float WMultibandNoise(float p[3], float s, float *normal, int firstBand, int nba
 
 int main(int argc, char const *argv[])
 {
-    GenerateNoiseTile(100);
-    
-    cv::Mat noiseImage = cv::Mat(std::sqrt(noiseTileSize*noiseTileSize*noiseTileSize),std::sqrt(noiseTileSize*noiseTileSize*noiseTileSize),CV_32F);
+    GenerateNoiseTile(10);
+
+    cv::Mat noiseImage = cv::Mat(std::sqrt(noiseTileSize * noiseTileSize * noiseTileSize), std::sqrt(noiseTileSize * noiseTileSize * noiseTileSize), CV_32F);
     int n = 0;
-    for(int i = 0;i < std::sqrt(noiseTileSize*noiseTileSize*noiseTileSize);i++)
+    for (int i = 0; i < std::sqrt(noiseTileSize * noiseTileSize * noiseTileSize); i++)
     {
-        for(int j = 0;j < std::sqrt(noiseTileSize*noiseTileSize*noiseTileSize);j++)
+        for (int j = 0; j < std::sqrt(noiseTileSize * noiseTileSize * noiseTileSize); j++)
         {
-            noiseImage.at<float>(i,j) = (noiseTileData[n]+1)/2;
+            noiseImage.at<float>(i, j) = (noiseTileData[n] + 1.) / 2.;
             n++;
-            //std::cout << i << " " << j << " " << noiseTileSize << std::endl;
         }
     }
     cv::imshow("image", noiseImage);
