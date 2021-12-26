@@ -1,5 +1,8 @@
 \documentclass[11pt,a4paper]{article}
 
+\usepackage{graphicx}
+\usepackage{caption}
+
 \title{Wavelet noise}
 \date{January 2022}
 \author{Florian Durand \\ Université Gustave Eiffel}
@@ -11,16 +14,25 @@
 
 
 \section{Abstract}
-
-
-
+When rendering a 3D noise, generated with Ken Perlin method, projected on 2D surface such as a screen. Most of the time it leads to aliasing and detail loss on certain scale. In this paper we try to find a solution to avoid those problems, while keeping the efficiency, the simplicity and easy control of the method. It is important for high quality rendering to not have any artifacts visible. In this report, we show that an efficient and controlable solution is the use of wavelets to generate noise. 
 \section{Introduction}
+Noise function is used to generate synthetic textures with natural randomness. It can be used to generate visual elements or even for procedural textures.
+\begin{figure}[h]
+	\includegraphics[height=0.25\textwidth]{pictures/texture-noise.png}
+	\includegraphics[height=0.25\textwidth]{pictures/landscape.png}
+	\centering
+	\captionsetup{justification=centering}
+	\caption{On the left an example of a procedural noise texture. On the right an example of landscape generated with noise.}
+\end{figure}
+\\In 2002, Perlin noise was the best noise function used. The benefits of this method was its efficienty, simplicity and easy control. What we understand as easy control, is that we can apply different types of signal to the random generator to control noise shape. Also noise is generated using coordinates, so there exists 1D, 2D, 3D and 4D(time) noise. At Pixar a computer animation film studio, they realized that noise on a certain scale can lead to aliasing and detail loss. Which means that when they rendered a scene with a far background using noise, we can not recognize the texture and it is not smooth or too smooth. Perlin is not enough band limited, this is the reason why we have too much details leading to aliasing. High frequencies not visible are the one that have impact at a certain scale. A good solution found was to use wavelets, to avoid these high frequencies.
+\section{Wavelets}
 
+\section{old}
 Noise function is used to generate synthetic textures with natural randomness. It can be used to generate visual elements or even for procedural textures. In 2002, Ken Perlin noise was the best noise function, despite that nowadays the fractal noise and simplex noise have take on Ken Perlin noise, we will study the Ken Perlin problems. The main problems are that 3D noise projected on 2D surface such as screen can lead to aliasing and detail loss.
 \\
 Perlin band of noise are limited in the range of frequencies. Using interpolation can help improve noise spectrum but it is expensive.
 Perlin benefits are speed, simplicity and easily control. Frequencies range is in power-of-2. These frequencies are composed of useful low frequencies visible and high frequencies that can cause aliasing.
-At Pixar they tried to find the best solution to avoid loss of detail and aliasing but we can see that their solution lose a lot of detail on far distance. They want to keep the band-limited property.
+At Pixar they tried to find the best solution to avoid loss of detail and aliasing, they used the wavelets to generate noise. But we can see that their solution lose a lot of detail on far distance. They want to keep the band-limited property.
 \\\\
 Method description :
 \begin{enumerate}
@@ -108,7 +120,7 @@ integer to float is not a problem, it converges fast\\
 projected noise pas tout compris\\
 noise evaluation using weight, see code\\
 this noise can controll statisticall distribution base on guassian distribution.\\
-use one noise tile\\
+use one noise tile, there is also \\
 
 
 \section{Main body}
