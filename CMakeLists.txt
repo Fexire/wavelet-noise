@@ -3,7 +3,7 @@ PROJECT(Helloworld)
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 set(CMAKE_CXX_STANDARD 17)
 
-add_compile_options(-Wall -O2)
+add_compile_options(-Werror -Wall -pedantic -ansi)
  
 find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )

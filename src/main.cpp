@@ -32,7 +32,9 @@ void Downsample(float *from, float *to, int n, int stride)
     {
         to[i * stride] = 0;
         for (int k = 2 * i - ARAD; k <= 2 * i + ARAD; k++)
+        {
             to[i * stride] += a[k - 2 * i] * from[Mod(k, n) * stride];
+        }
     }
 }
 void Upsample(float *from, float *to, int n, int stride)
@@ -43,7 +45,9 @@ void Upsample(float *from, float *to, int n, int stride)
     {
         to[i * stride] = 0;
         for (int k = i / 2; k <= i / 2 + 1; k++)
+        {
             to[i * stride] += p[i - 2 * k] * from[Mod(k, n / 2) * stride];
+        }
     }
 }
 
@@ -55,29 +59,37 @@ void GenerateNoiseTile(int n)
     float *temp1 = (float *)malloc(sz), *temp2 = (float *)malloc(sz), *noise = (float *)malloc(sz);
     /* Step 1. Fill the tile with random numbers in the range -1 to 1. */
     for (i = 0; i < n * n * n; i++)
+    {
         noise[i] = gaussianNoise(generator);
+    }
     /* Steps 2 and 3. Downsample and upsample the tile */
     for (iy = 0; iy < n; iy++)
+    {
         for (iz = 0; iz < n; iz++)
         { /* each x row */
             i = iy * n + iz * n * n;
             Downsample(&noise[i], &temp1[i], n, 1);
             Upsample(&temp1[i], &temp2[i], n, 1);
         }
+    }
     for (ix = 0; ix < n; ix++)
+    {
         for (iz = 0; iz < n; iz++)
         { /* each y row */
             i = ix + iz * n * n;
             Downsample(&temp2[i], &temp1[i], n, n);
             Upsample(&temp1[i], &temp2[i], n, n);
         }
+    }
     for (ix = 0; ix < n; ix++)
+    {
         for (iy = 0; iy < n; iy++)
         { /* each z row */
             i = ix + iy * n;
             Downsample(&temp2[i], &temp1[i], n, n * n);
             Upsample(&temp1[i], &temp2[i], n, n * n);
         }
+    }
     /* Step 4. Subtract out the coarse-scale contributionnoiseTileData */
     for (i = 0; i < n * n * n; i++)
     {
@@ -95,6 +107,7 @@ void GenerateNoiseTile(int n)
     {
         noise[i] += temp1[i];
     }
+    
     noiseTileData = noise;
     noiseTileSize = n;
     free(temp1);
@@ -132,11 +145,11 @@ float WNoise(float p[3])
 float WProjectedNoise(float p[3], float normal[3])
 {                                                   /* 3D noise projected onto 2D */
     int i, c[3], min[3], max[3], n = noiseTileSize; /* c = noise coeff location */
-    float support, result = 0;
+    float result = 0;
     /* Bound the support of the basis functions for this projection direction */
     for (i = 0; i < 3; i++)
     {
-        support = 3 * abs(normal[i]) + 3 * sqrt((1 - normal[i] * normal[i]) / 2);
+        // support = 3 * abs(normal[i]) + 3 * sqrt((1 - normal[i] * normal[i]) / 2);
         min[i] = ceil(p[i] - (3 * abs(normal[i]) + 3 * sqrt((1 - normal[i] * normal[i]) / 2)));
         max[i] = floor(p[i] + (3 * abs(normal[i]) + 3 * sqrt((1 - normal[i] * normal[i]) / 2)));
     }
@@ -193,21 +206,100 @@ float WMultibandNoise(float p[3], float s, float *normal, int firstBand, int nba
     return result;
 }
 
-int main(int argc, char const *argv[])
+cv::Mat nonProjected3Dnoise()
 {
-    GenerateNoiseTile(10);
-
-    cv::Mat noiseImage = cv::Mat(std::sqrt(noiseTileSize * noiseTileSize * noiseTileSize), std::sqrt(noiseTileSize * noiseTileSize * noiseTileSize), CV_32F);
-    int n = 0;
-    for (int i = 0; i < std::sqrt(noiseTileSize * noiseTileSize * noiseTileSize); i++)
+    GenerateNoiseTile(64);
+    int size = 10;
+    cv::Mat noiseImage = cv::Mat(size, size, CV_32F);
+    float p[3];
+    int nbands = 2;
+    std::vector<float> w = std::vector<float>(nbands, 1);
+    for (p[0] = 0; p[0] < size; p[0]++)
     {
-        for (int j = 0; j < std::sqrt(noiseTileSize * noiseTileSize * noiseTileSize); j++)
+        for (p[1] = 0; p[1] < size; p[1]++)
         {
-            noiseImage.at<float>(i, j) = (noiseTileData[n] + 1.) / 2.;
-            n++;
+            noiseImage.at<float>(p[0], p[1]) = (WMultibandNoise(p, 1, nullptr, -nbands, nbands, w.data()) + 1.) / 2.;
         }
     }
-    cv::imshow("image", noiseImage);
+    return noiseImage;
+}
+
+cv::Mat projected3Dnoise()
+{
+    GenerateNoiseTile(64);
+    int size = 300;
+    cv::Mat noiseImage = cv::Mat(size, size, CV_32F);
+    float p[3];
+    int nbands = 20;
+    std::vector<float> w = std::vector<float>(nbands, 1);
+    float *normals = (float *)malloc(size * size * 3 * sizeof(float));
+    for (int i = 0; i < size * size * 3; i += 3)
+    {
+        normals[i] = 0;
+        normals[i + 1] = 0;
+        normals[i + 2] = 1;
+    }
+    for (p[0] = 0; p[0] < size; p[0]++)
+    {
+        for (p[1] = 0; p[1] < size; p[1]++)
+        {
+            noiseImage.at<float>(p[0], p[1]) = (WMultibandNoise(p, 1, nullptr, -nbands, nbands, w.data()) + 1.) / 2.;
+        }
+    }
+    free(normals);
+    return noiseImage;
+}
+
+cv::Mat dft(cv::Mat &src)
+{
+    cv::Mat padded; // expand input image to optimal size
+    int m = cv::getOptimalDFTSize(src.rows);
+    int n = cv::getOptimalDFTSize(src.cols); // on the border add zero values
+
+    copyMakeBorder(src, padded, 0, m - src.rows, 0, n - src.cols, cv::BORDER_CONSTANT, cv::Scalar::all(0));
+    cv::Mat planes[] = {cv::Mat_<float>(padded), cv::Mat::zeros(padded.size(), CV_32F)};
+    cv::Mat complexI;
+    merge(planes, 2, complexI); // Add to the expanded another plane with zeros
+    dft(complexI, complexI);    // this way the result may fit in the source matrix
+    // compute the magnitude and switch to logarithmic scale
+    // => log(1 + sqrt(Re(DFT(I))^2 + Im(DFT(I))^2))
+    split(complexI, planes);                    // planes[0] = Re(DFT(I), planes[1] = Im(DFT(I))
+    magnitude(planes[0], planes[1], planes[0]); // planes[0] = magnitude
+    cv::Mat magI = planes[0];
+    magI += cv::Scalar::all(1); // switch to logarithmic scale
+    log(magI, magI);
+    // crop the spectrum, if it has an odd number of rows or columns
+    magI = magI(cv::Rect(0, 0, magI.cols & -2, magI.rows & -2));
+    // rearrange the quadrants of Fourier image  so that the origin is at the image center
+    int cx = magI.cols / 2;
+    int cy = magI.rows / 2;
+    cv::Mat q0(magI, cv::Rect(0, 0, cx, cy));   // Top-Left - Create a ROI per quadrant
+    cv::Mat q1(magI, cv::Rect(cx, 0, cx, cy));  // Top-Right
+    cv::Mat q2(magI, cv::Rect(0, cy, cx, cy));  // Bottom-Left
+    cv::Mat q3(magI, cv::Rect(cx, cy, cx, cy)); // Bottom-Right
+    cv::Mat tmp;                                // swap quadrants (Top-Left with Bottom-Right)
+    q0.copyTo(tmp);
+    q3.copyTo(q0);
+    tmp.copyTo(q3);
+    q1.copyTo(tmp); // swap quadrant (Top-Right with Bottom-Left)
+    q2.copyTo(q1);
+    tmp.copyTo(q2);
+    normalize(magI, magI, 0, 1, cv::NORM_MINMAX); // Transform the matrix with float values into a
+                                                  // viewable image form (float between values 0 and 1).
+    return magI;
+}
+
+int main(int argc, char const *argv[])
+{
+    cv::Mat nonProjectedImage = nonProjected3Dnoise();
+    cv::imshow("nonProjected3Dnoise", nonProjectedImage);
+    
+    /*
+    cv::Mat projectedImage = projected3Dnoise();
+    cv::imshow("dftnonProjected3Dnoise", dft(nonProjectedImage));
+    cv::imshow("projected3Dnoise", projected3Dnoise());
+    cv::imshow("dftProjected3Dnoise", dft(projectedImage));
+    */
     cv::waitKey(0);
     return 0;
 }
