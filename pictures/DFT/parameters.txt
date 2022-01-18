@@ -1,0 +1,5 @@
+image size = 300
+tileSize = 128
+scale = 1
+w = gaussianDistribution(0,1)
+nbands = dynamic

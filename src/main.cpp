@@ -270,6 +270,8 @@ cv::Mat dft(cv::Mat &src)
     tmp.copyTo(q2);
     normalize(magI, magI, 0, 1, cv::NORM_MINMAX); // Transform the matrix with float values into a
                                                   // viewable image form (float between values 0 and 1).
+    magI = magI - 0.5;
+    magI.convertTo(magI,CV_16U,255.);
     return magI;
 }
 
@@ -333,13 +335,27 @@ void expDistribution(int nbands, float *w)
     }
 }
 
+void quadDistribution(int nbands, float *w)
+{
+    float max = (nbands-1.) * (nbands-1.);
+    for (int i = 0; i < nbands; i++)
+    {
+        w[i] = i*i;
+    }
+    for (int i = 0; i < nbands; i++)
+    {
+        w[i] /= max;
+        std::cout << w[i] << std::endl;
+    }
+}
+
 int main(int argc, char const *argv[])
 {
-    int tileSize = 50;
+    int tileSize = 128;
     GenerateNoiseTile(tileSize);
-    const int nbands = 4;
-    int size = 150;
-    float scale = 1;
+    const int nbands = 16;
+    int size = 300;
+    float scale = 2;
     float w[nbands];
     gaussianDistribution(nbands, w);
     float *normals = (float *)malloc(size * size * 3 * sizeof(float));
@@ -352,11 +368,12 @@ int main(int argc, char const *argv[])
     cv::Mat nonProjectedImage = nonProjected3Dnoise(scale, size, nbands, w);
     cv::Mat projectedImage = projected3Dnoise(scale, size, nbands, w, normals);
     free(normals);
-    cv::imshow("Non-Projected 3D noise", nonProjectedImage);
-    cv::imshow("DFT Non-Projected 3D noise", dft(nonProjectedImage));
-    cv::imshow("Projected 3D noise", projectedImage);
-    cv::imshow("DFT Projected 3D noise", dft(projectedImage));
-
+    nonProjectedImage.convertTo(nonProjectedImage,CV_16U,255.);
+    projectedImage.convertTo(projectedImage,CV_16U,255.);
+    cv::imwrite("pictures/Non-Projected 3D noise.jpg", nonProjectedImage);
+    cv::imwrite("pictures/DFT Non-Projected 3D noise.jpg", dft(nonProjectedImage));
+    cv::imwrite("pictures/Projected 3D noise.jpg", projectedImage);
+    cv::imwrite("pictures/DFT Projected 3D noise.jpg", dft(projectedImage));
     cv::waitKey(0);
     return 0;
 }
