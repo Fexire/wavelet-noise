@@ -2,6 +2,8 @@
 
 \usepackage{graphicx}
 \usepackage{caption}
+\usepackage{listings}
+
 
 \title{Wavelet noise}
 \date{January 2022}
@@ -45,6 +47,35 @@ When downsampling only representable part are kept, then by upsampling and subst
 \item This method can be applied to any dimension.
 \item This method uses integers parameters. It's not a problem for float values, as it converges fast.
 \item Using Gaussian distribution, we can controll the noise distribution.
+\end{enumerate}
+
+
+\section{Conclusion}
+
+Wavelet noise is a well suited solution to avoid detail loss and aliasing when scaling noise for 3D scene rendering. The method is pretty efficient until the repeating patterns are not a problem for the use. However it's particularly focusing on rendering specifities, this method is not generic at all. Most of the functions used are based on the knowledge of how a scene is rendered. Band weight is easy to control, we can easily use different signals to produce an interesting texture. This method only works on static textures, creating abrut transition would make the noise lose some properties like the orthogonality.
+
+\begin{lstlisting}[language=C]
+#define ARAD 16
+void Downsample (float *from, float *to, int n, int stride ) {
+	float *a, aCoeffs[2*ARAD] = {
+	0.000334,-0.001528, 0.000410, 0.003545,-0.000938,-0.008233, 0.002172, 		0.019120,
+	-0.005040,-0.044412, 0.011655, 0.103311,-0.025936,-0.243780, 0.033979, 	0.655340,
+	0.655340, 0.033979,-0.243780,-0.025936, 0.103311, 0.011655,-0.044412,-0.005040,
+	0.019120, 0.002172,-0.008233,-0.000938, 0.003546, 0.000410,-0.001528, 	0.000334};
+	a = &aCoeffs[ARAD];
+	for (int i=0; i<n/2; i++) {
+		to[i*stride] = 0;
+		for (int k=2*i-ARAD; k<=2*i+ARAD; k++)
+			to[i*stride] += a[k-2*i] * from[Mod(k,n)*stride];
+	}
+}
+\end{lstlisting}
+This function was not correct in the nested for, the $k<=2*i+ARAD$ lead to an error as $a[k-2*i]$ can access to the $a[32]$ value but aCoeffs size is 32. In order to avoid this error replace $k<=2*i+ARAD \rightarrow k<2*i+ARAD$.
+The article lacks of numerics, mainly on the weight distribution values and also tile size used
+\section{Bibliography}
+
+\begin{enumerate}
+\item https://graphics.pixar.com/library/WaveletNoise/paper.pdf
 \end{enumerate}
 
 \section{old}
@@ -137,15 +168,5 @@ this noise can controll statisticall distribution base on guassian distribution.
 use one noise tile, there is also \\
 
 
-
-\section{Conclusion}
-
-
-
-\section{Bibliography}
-
-\begin{enumerate}
-\item https://graphics.pixar.com/library/WaveletNoise/paper.pdf
-\end{enumerate}
 
 \end{document}
