@@ -11,7 +11,7 @@
 static float *noiseTileData;
 static int noiseTileSize;
 
-std::normal_distribution<float> gaussianNoise(0, 0.2);
+std::normal_distribution<float> gaussianNoise(0, 1);
 std::default_random_engine generator;
 
 int Mod(int x, int n)
@@ -60,7 +60,7 @@ void GenerateNoiseTile(int n)
     /* Step 1. Fill the tile with random numbers in the range -1 to 1. */
     for (i = 0; i < n * n * n; i++)
     {
-        noise[i] = gaussianNoise(generator);
+        noise[i] = gaussianNoise(generator) / 4.;
     }
     /* Steps 2 and 3. Downsample and upsample the tile */
     for (iy = 0; iy < n; iy++)
@@ -206,29 +206,29 @@ float WMultibandNoise(float p[3], float s, float *normal, int firstBand, int nba
     return result;
 }
 
-cv::Mat nonProjected3Dnoise(int size,int nbands,float * w)
+cv::Mat nonProjected3Dnoise(float scale, int size, int nbands, float *w)
 {
     cv::Mat noiseImage = cv::Mat(size, size, CV_32F);
-    float p[3] = {0,0,0};
+    float p[3] = {0, 0, 0};
     for (p[0] = 0; p[0] < size; p[0]++)
     {
         for (p[1] = 0; p[1] < size; p[1]++)
         {
-            noiseImage.at<float>(p[0], p[1]) = (WMultibandNoise(p, 1, nullptr, -nbands, nbands, w) + 1.) / 2.;
+            noiseImage.at<float>(p[0], p[1]) = (WMultibandNoise(p, scale, nullptr, -nbands, nbands, w) + 1.) / 2.;
         }
     }
     return noiseImage;
 }
 
-cv::Mat projected3Dnoise(int size,int nbands,float * w,float * normals)
+cv::Mat projected3Dnoise(float scale, int size, int nbands, float *w, float *normals)
 {
     cv::Mat noiseImage = cv::Mat(size, size, CV_32F);
-    float p[3] = {0,0,0};
+    float p[3] = {0, 0, 0};
     for (p[0] = 0; p[0] < size; p[0]++)
     {
         for (p[1] = 0; p[1] < size; p[1]++)
         {
-            noiseImage.at<float>(p[0], p[1]) = (WMultibandNoise(p, 1, normals, -nbands, nbands, w) + 1.) / 2.;
+            noiseImage.at<float>(p[0], p[1]) = (WMultibandNoise(p, scale, normals, -nbands, nbands, w) + 1.) / 2.;
         }
     }
     return noiseImage;
@@ -273,12 +273,75 @@ cv::Mat dft(cv::Mat &src)
     return magI;
 }
 
+void constantDistribution(int nbands, float *w)
+{
+    for (int i = 0; i < nbands; i++)
+    {
+        w[i] = 1;
+    }
+}
+
+void gaussianDistribution(int nbands, float *w)
+{
+    float sigma = 1;
+    float max = 0;
+    for (int i = -nbands / 2; i < nbands / 2; i++)
+    {
+        w[i + nbands / 2] = (1 / sigma * sqrt(2 * M_PI)) * exp(-0.5 * pow(i / sigma, 2));
+        if (w[i + nbands / 2] > max)
+        {
+            max = w[i + nbands / 2];
+        }
+    }
+    for (int i = 0; i < nbands; i++)
+    {
+        w[i] /= max;
+    }
+}
+
+void cosDistribution(int nbands, float *w)
+{
+    float max = 0;
+    for (int i = -nbands / 2; i < nbands / 2; i++)
+    {
+        w[i + nbands / 2] = cos(i);
+        if (w[i + nbands / 2] > max)
+        {
+            max = w[i + nbands / 2];
+        }
+    }
+    for (int i = 0; i < nbands; i++)
+    {
+        w[i] /= max;
+    }
+}
+
+void expDistribution(int nbands, float *w)
+{
+    float max = 0;
+    for (int i = -nbands / 2; i < nbands / 2; i++)
+    {
+        w[i + nbands / 2] =  exp( 2 + i/double(1+i*i));
+        if (w[i + nbands / 2] > max)
+        {
+            max = w[i + nbands / 2];
+        }
+    }
+    for (int i = 0; i < nbands; i++)
+    {
+        w[i] /= max;
+    }
+}
+
 int main(int argc, char const *argv[])
 {
-    GenerateNoiseTile(16);
-    int nbands = 2;
-    int size = 300;
-    std::vector<float> w = std::vector<float>(nbands, 1);
+    int tileSize = 50;
+    GenerateNoiseTile(tileSize);
+    const int nbands = 4;
+    int size = 150;
+    float scale = 1;
+    float w[nbands];
+    gaussianDistribution(nbands, w);
     float *normals = (float *)malloc(size * size * 3 * sizeof(float));
     for (int i = 0; i < size * size * 3; i += 3)
     {
@@ -286,15 +349,14 @@ int main(int argc, char const *argv[])
         normals[i + 1] = 0;
         normals[i + 2] = 1;
     }
-
-    cv::Mat nonProjectedImage = nonProjected3Dnoise(size,nbands,w.data());
-    cv::Mat projectedImage = projected3Dnoise(size,nbands,w.data(),normals);
+    cv::Mat nonProjectedImage = nonProjected3Dnoise(scale, size, nbands, w);
+    cv::Mat projectedImage = projected3Dnoise(scale, size, nbands, w, normals);
     free(normals);
-    cv::imshow("nonProjected3Dnoise", nonProjectedImage);
-    cv::imshow("dftnonProjected3Dnoise", dft(nonProjectedImage));
-    cv::imshow("projected3Dnoise", projectedImage);
-    cv::imshow("dftProjected3Dnoise", dft(projectedImage));
+    cv::imshow("Non-Projected 3D noise", nonProjectedImage);
+    cv::imshow("DFT Non-Projected 3D noise", dft(nonProjectedImage));
+    cv::imshow("Projected 3D noise", projectedImage);
+    cv::imshow("DFT Projected 3D noise", dft(projectedImage));
+
     cv::waitKey(0);
-    
     return 0;
 }
