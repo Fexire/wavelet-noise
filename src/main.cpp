@@ -201,8 +201,10 @@ float WMultibandNoise(float p[3], float s, float *normal, int firstBand, int nba
         variance += w[b] * w[b];
     }
     /* Adjust the noise so it has a variance of 1. */
+    /*
     if (variance)
         result /= sqrt(variance * ((normal) ? 0.296 : 0.210));
+    */
     return result;
 }
 
@@ -224,11 +226,14 @@ cv::Mat projected3Dnoise(float scale, int size, int nbands, float *w, float *nor
 {
     cv::Mat noiseImage = cv::Mat(size, size, CV_32F);
     float p[3] = {0, 0, 0};
+    float p2[3] = {0,0,0};
     for (p[0] = 0; p[0] < size; p[0]++)
     {
         for (p[1] = 0; p[1] < size; p[1]++)
         {
-            noiseImage.at<float>(p[0], p[1]) = (WMultibandNoise(p, scale, normals, -nbands, nbands, w) + 1.) / 2.;
+            p2[0] = p[0];
+            p2[1] = p[1];
+            noiseImage.at<float>(p[0], p[1]) = (WMultibandNoise(p2, scale, normals, -nbands, nbands, w) + 1.) / 2.;
         }
     }
     return noiseImage;
@@ -353,9 +358,9 @@ int main(int argc, char const *argv[])
 {
     int tileSize = 128;
     GenerateNoiseTile(tileSize);
-    const int nbands = 16;
+    const int nbands = 4;
     int size = 300;
-    float scale = 2;
+    float scale = 3;
     float w[nbands];
     gaussianDistribution(nbands, w);
     float *normals = (float *)malloc(size * size * 3 * sizeof(float));
